@@ -49,16 +49,18 @@ interface Props {
   discount: [];
   currencyCode: string;
 }
+interface myProps {
+  arr : any[];
+}
 const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [surgeryModal, setSurgeryModal] = useState(false);
   const [discountModal, setDiscountModal] = useState(false);
-
+  const [totalPr, setTotalPr] = useState(0);
+  const [arr, setArr] = useState<myProps['arr']>([]);
+  let dumy: any[] = [...arr];
+  
   const showSurgeryModal = () => {
     setSurgeryModal(true);
-  };
-
-  const handleOkSurgery = () => {
-    setSurgeryModal(false);
   };
 
   const handleCancelSurgery = () => {
@@ -69,10 +71,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     setDiscountModal(true);
   };
 
-  const handleOkDiscount = () => {
-    setDiscountModal(false);
-  };
-
   const handleCancelDiscount = () => {
     setDiscountModal(false);
   };
@@ -80,6 +78,31 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   const handleChange = (value:string) => {
     console.log(`selected ${value}`);
   }
+
+  const handlePickItem = (e:any) => {
+    let data: {name:string, price:string} = {
+      name: e.target.id,
+      price: e.target.name
+    }
+    if(e.target.checked){ // 체크누르면
+      dumy.push(data); // newArr에 넣자
+    }else{ // 체크해제하면
+      for(let i=0; i<dumy.length; i++){
+        if(dumy[i]['name'] === e.target.id){ // newArr에 있는지 확인하구 있다면
+          dumy.splice(i,1) //없애자
+        }
+      }
+    };
+  }
+  
+  const handleOkSurgery = () => {
+    setArr(dumy);
+    setSurgeryModal(false);
+  };
+
+  const handleOkDiscount = () => {
+    setDiscountModal(false);
+  };
 
   return(
     <>
@@ -93,7 +116,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
             Object.entries(item).map((e,idx) => {
               return(
                 <ModalLi key={idx}>
-                  <ModalInput type='checkbox' id={e[1]['name']}/>
+                  <ModalInput type='checkbox' id={e[1]['name']} name={e[1]['price']} onClick={handlePickItem}/>
                   <label htmlFor={e[1]['name']}>{e[1]['name']}</label>
                   <p>{e[1]['price']}원</p>
                 </ModalLi>
@@ -123,22 +146,28 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       </ButtonSection>
       <hr style={{ width: 500 }}/>
       <MenuList>
-        <MenuBox>
-          <MenuName>
-            <ItemName>학생컷</ItemName>
-            <Price>15,000원</Price>
-          </MenuName>
-          <Select defaultValue="1" style={{ width: 60 }} onChange={handleChange}>
-            <Option value="1">1</Option>
-            <Option value="2">2</Option>
-            <Option value="3">3</Option>
-            <Option value="4">4</Option>
-            <Option value="5">5</Option>
-          </Select>
-        </MenuBox>
+        {
+          arr.map((e,idx) => {
+            return (
+              <MenuBox key={idx}>
+                <MenuName>
+                  <ItemName>{e.name}</ItemName>
+                  <Price >{e.price}원</Price>
+                </MenuName>
+                <Select defaultValue="1" style={{ width: 60 }} onChange={handleChange}>
+                  <Option value="1">1</Option>
+                  <Option value="2">2</Option>
+                  <Option value="3">3</Option>
+                  <Option value="4">4</Option>
+                  <Option value="5">5</Option>
+                </Select>
+              </MenuBox>
+            )
+          })
+        }
       </MenuList>
       <hr style={{ width: 500 }}/>
-      <Total currencyCode={currencyCode}/>
+      <Total currencyCode={currencyCode} totalPr={totalPr}/>
     </>
   );
 }

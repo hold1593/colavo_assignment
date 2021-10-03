@@ -12,13 +12,14 @@ const TotalPrice = styled.p`
 
 interface Props {
   currencyCode : string;
+  totalPr: number;
 }
 
 const Total = (props: Props) => {
   return(
     <TotalSection>
       <p>합계</p>
-      <TotalPrice>0원</TotalPrice>
+      <TotalPrice>{props.totalPr}원</TotalPrice>
     </TotalSection>
   )
 }
