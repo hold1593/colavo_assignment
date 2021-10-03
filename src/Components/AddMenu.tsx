@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Select } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import ItemList from '../Components/ItemList';
+import Total from '../Components/Total';
 import styled from 'styled-components';
 import '../my_custom.css';
 
@@ -9,24 +9,37 @@ const ButtonSection = styled.section`
   display: flex;
 `;
 const MenuList = styled.div`
+  height: 500px;
+  width: 400px;
+`;
+const MenuBox = styled.div`
   display: flex;
-`;
-const MenuUl = styled.ul`
+  justify-content: space-between;
+  align-items: center;
   list-style: none;
-  padding: 0;
+  padding: 10px;
 `;
-const MenuLi = styled.li``;
+const MenuName = styled.div`
+  font-size: 15px;
+`;
+const ItemName = styled.p`
+  font-size: 16px;
+  font-weight : bold;
+`;
+const Price = styled.p`
+  font-size: 13px;
+`;
 const ModalUl = styled.ul`
   list-style: none;
   display: flex;
   flex-direction: column;
   `;
 const ModalLi = styled.li`
-  font-size: 17px;
-  cursor: pointer;
+  margin-bottom: 15px;
   `;
 const ModalInput = styled.input`
   margin-right: 15px;
+  cursor: pointer;
 `;
 
 const { Option } = Select;
@@ -34,8 +47,9 @@ const { Option } = Select;
 interface Props {
   item : [];
   discount: [];
+  currencyCode: string;
 }
-const AddMenu = ({item, discount}: Props) => {
+const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [surgeryModal, setSurgeryModal] = useState(false);
   const [discountModal, setDiscountModal] = useState(false);
 
@@ -76,9 +90,9 @@ const AddMenu = ({item, discount}: Props) => {
         <Modal title="시술 메뉴" visible={surgeryModal} onOk={handleOkSurgery} onCancel={handleCancelSurgery}>
           <ModalUl>
           {
-            Object.entries(item).map(e => {
+            Object.entries(item).map((e,idx) => {
               return(
-                <ModalLi>
+                <ModalLi key={idx}>
                   <ModalInput type='checkbox' id={e[1]['name']}/>
                   <label htmlFor={e[1]['name']}>{e[1]['name']}</label>
                   <p>{e[1]['price']}원</p>
@@ -94,9 +108,9 @@ const AddMenu = ({item, discount}: Props) => {
         <Modal title="할인" visible={discountModal} onOk={handleOkDiscount} onCancel={handleCancelDiscount}>
           <ModalUl>
           {
-            Object.entries(discount).map(e => {
+            Object.entries(discount).map((e,idx) => {
               return(
-                <ModalLi>
+                <ModalLi key={idx}>
                   <ModalInput type='checkbox' id={e[1]['name']}/>
                   <label htmlFor={e[1]['name']}>{e[1]['name']}</label>
                   <p>{Math.floor(e[1]['rate']*100)}%</p>
@@ -107,22 +121,24 @@ const AddMenu = ({item, discount}: Props) => {
           </ModalUl>
         </Modal>
       </ButtonSection>
-      <hr style={{ width: 800 }}/>
+      <hr style={{ width: 500 }}/>
       <MenuList>
-        <MenuUl>
-          <MenuLi>
-            <p>학생컷</p>
-            <p>15,000원</p>
-            <Select defaultValue="1" style={{ width: 60 }} onChange={handleChange}>
-              <Option value="1">1</Option>
-              <Option value="2">2</Option>
-              <Option value="3">3</Option>
-              <Option value="4">4</Option>
-              <Option value="5">5</Option>
-            </Select>
-          </MenuLi>
-        </MenuUl>
+        <MenuBox>
+          <MenuName>
+            <ItemName>학생컷</ItemName>
+            <Price>15,000원</Price>
+          </MenuName>
+          <Select defaultValue="1" style={{ width: 60 }} onChange={handleChange}>
+            <Option value="1">1</Option>
+            <Option value="2">2</Option>
+            <Option value="3">3</Option>
+            <Option value="4">4</Option>
+            <Option value="5">5</Option>
+          </Select>
+        </MenuBox>
       </MenuList>
+      <hr style={{ width: 500 }}/>
+      <Total currencyCode={currencyCode}/>
     </>
   );
 }

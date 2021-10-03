@@ -6,11 +6,18 @@ const GlobalStyle = createGlobalStyle`
 
   html,
   body {
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   * {
     box-sizing: border-box;
+  }
+  p{
+    margin: 0;
+  }
+  label{
+    cursor: pointer;
   }
 `;
 

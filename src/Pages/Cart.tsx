@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import AddMenu from '../Components/AddMenu';
 import CustomerInfo from '../Components/CustomerInfo';
 import axios from 'axios';
-import Total from '../Components/Total';
 
 const CartSection = styled.section`
   display: flex;
@@ -39,8 +38,7 @@ const Cart = () => {
   return(
     <CartSection>
       <CustomerInfo /> 
-      <AddMenu item={item} discount={discount}/>
-      <Total currencyCode={currencyCode}/>
+      <AddMenu item={item} discount={discount} currencyCode={currencyCode}/>
     </CartSection>
   )
 }
