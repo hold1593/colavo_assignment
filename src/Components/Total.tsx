@@ -5,6 +5,7 @@ const TotalSection = styled.div`
   justify-content: space-between;
   width: 400px;
   align-items: center;
+  margin-bottom: 5rem;
 `;
 const TotalPrice = styled.p`
   font-size: 20px;
@@ -15,11 +16,17 @@ interface Props {
   totalPr: number;
 }
 
-const Total = (props: Props) => {
+ // 천단위 , 정규식
+ const Total = (props: Props) => {
+
+  const priceToString = (price:number) =>{
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
   return(
     <TotalSection>
       <p>합계</p>
-      <TotalPrice>{props.totalPr}원</TotalPrice>
+      <TotalPrice>{priceToString(props.totalPr)}원</TotalPrice>
     </TotalSection>
   )
 }
