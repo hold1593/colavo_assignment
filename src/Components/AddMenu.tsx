@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, Select } from 'antd';
+import { Modal, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import Total from '../Components/Total';
 import styled from 'styled-components';
@@ -33,6 +33,10 @@ const ItemName = styled.p`
 const Price = styled.p`
   font-size: 13px;
 `;
+const SalePrice = styled.p`
+  font-size: 13px;
+  color: #e91e63;
+`;
 const ModalUl = styled.ul`
   list-style: none;
   display: flex;
@@ -46,23 +50,23 @@ const ModalInput = styled.input`
   cursor: pointer;
 `;
 const SelectCount = styled.select`
-  width: 60px;
+  width: 70px;
   height: 30px;
   border: 1px solid #d9d9d9;
   background-color: #fff;
   border-radius: 2px;
   padding: 5px;
-  -webkit-appearance: none; /* 네이티브 외형 감추기 */ 
-  -moz-appearance: none; 
-  appearance: none;
   
   &:hover{
     cursor: pointer;
     border: 1px solid #d0b0ff;
-
   }
 `;
-const { Option } = Select;
+const NoteP = styled.p`
+  font-size: 12px;
+  text-align: center;
+  color: #9e9e9e;
+`;
 
 interface Props {
   item : [];
@@ -76,6 +80,7 @@ interface myProps {
 const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [surgeryModal, setSurgeryModal] = useState(false);
   const [discountModal, setDiscountModal] = useState(false);
+  const [pickDisModal, setPickDisModal] = useState(false);
   const [totalPr, setTotalPr] = useState(0);
   const [arr, setArr] = useState<myProps['arr']>([]);
   const [disArr, setDisArr] = useState<myProps['arr']>([]);
@@ -84,10 +89,15 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     price: 0,
     count : 1,
   }
+  let disData: {name:string, rate:number, price:number} = {
+    name: '',
+    rate: 0,
+    price: 0,
+  }
   let dumy: any[] = [...arr];
   let money: number = 0;
   let dumyDis: any[] = [...disArr];
-  
+ 
   const showSurgeryModal = () => {
     setSurgeryModal(true);
   };
@@ -112,6 +122,8 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       count : parseInt(e.target.value),
     }
 
+    console.log('dumy:::',dumy);
+    console.log('newArr:::',newArr);
     for(let i=0; i<newArr.length; i++){
       // arr[i]['name']값이 e.target.id랑 일치하면
       if(newArr[i]['name'] === e.target.id){
@@ -125,8 +137,40 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     setTotalPr(money);
   }
 
+  const handleDiscount = (e:any) => {
+    let oriArr = [...disArr];
+    let helpArr = [...arr];
+    let dumy: {name: string, item: string, rate: number, price: number, count:number} = {
+      name: e.target.name,
+      item: e.target.value,
+      rate: Number(e.target.id),
+      price: 0,
+      count: 1,
+    }
+   // console.log('helpArr::',helpArr)
+    //console.log('oriArr::',oriArr)
+    //console.log('dumy::',dumy)
+    
+    // 더미 데이터 만드는 로직
+    for(let i=0; i<helpArr.length; i++){
+      if(dumy['item'] === helpArr[i]['name']) {
+        dumy['price'] = helpArr[i]['price'];
+        dumy['count'] = helpArr[i]['count'];
+      }
+    }
+   // console.log('수정 dumy:::',dumy);
+
+    // 완성된 더미데이터 oriArr에 대체하기
+    for(let i=0; i<oriArr.length; i++){
+      if(oriArr[i]['name'] === dumy['name']){ // 같으면
+        oriArr.splice(i,1,dumy);
+      }
+    }
+    //console.log('수정 oriArr::',oriArr)
+    setDisArr(oriArr);
+  } 
+
   const handlePickItem = (e:any) => {
-   
     data = {
       name: e.target.id,
       price: parseInt(e.target.name),
@@ -142,16 +186,16 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
         }
       }
     };
-    
   }
 
   const handlePickDiscount = (e:any) => {
-    let data: {name:string, rate:number} = {
+    disData = {
       name: e.target.id,
-      rate: e.target.name,
+      rate: Number(e.target.name),
+      price: 0,
     }
     if(e.target.checked){ // 체크누르면
-      dumyDis.push(data); // newArr에 넣자
+      dumyDis.push(disData); // newArr에 넣자
     }else{ // 체크해제하면
       for(let i=0; i<dumyDis.length; i++){
         if(dumyDis[i]['name'] === e.target.id){ // newArr에 있는지 확인하구 있다면
@@ -195,7 +239,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
                   <ModalInput type='checkbox' id={e[1]['name']} name={e[1]['price']} className={e[1]['count']} onClick={handlePickItem}/>
                   <label htmlFor={e[1]['name']}>{e[1]['name']}</label>
                   <p>{priceToString(e[1]['price'])}원</p>
-                  <p>수량:{e[1]['count']}</p>
                 </ModalLi>
               )
             })
@@ -232,7 +275,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
                   <ItemName>{e.name}</ItemName>
                   <Price>{priceToString(e.price*e.count)}원</Price>
                 </MenuName>
-                <SelectCount onChange={handleChange} id={e.name} name={e.price}>
+                <SelectCount onChange={handleChange} id={e.name} name={e.price} >
                   <option defaultValue="1">1</option> 
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -246,28 +289,39 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
           <></>
         }
         {
+          arr.length > 0?
+          <>
+            <hr />
+            <NoteP>* 시술 갯수 조정 후 할인권 재선택 바랍니다.</NoteP>
+          </>
+        : <></>
+        }
+        {
           disArr.length > 0 ?
             disArr.map((e, idx) => {
               return(
                 <MenuBox key={idx}>
                   <MenuName>
-                    <ItemName>{e.name}</ItemName>
-                    <Price>{Math.floor(e.rate*100)}%</Price>
+                    <ItemName>[{e.name}] {Math.floor(e.rate*100)}%</ItemName>
+                    <SalePrice>{
+                      isNaN((Math.floor(e.price*e.rate)*e.count)) ?
+                      0 : `-`+priceToString(Math.floor(e.price*e.rate)*e.count)
+                      }원</SalePrice>
                   </MenuName>
-                  <Select defaultValue="선택" style={{ width: 80 }} >
-                    {arr.map((e,idx) => {
+                  <SelectCount onChange={handleDiscount} id={e.rate} name={e.name} className="init">
+                    <option defaultValue="none">선택</option>
+                    {
+                    arr.map((el,index) => {
                       return (
-                        <>
-                          <Option key={idx} value={idx}>{e.name}</Option>
-                        </>
+                        <option key={index} id={el.price} value={el.name}>{el.name}</option>
                       )
                     })}
-                  </Select>
+                  </SelectCount>
                 </MenuBox>
                 )
               })
             :
-              <></>
+            <></>
         }
       </MenuList>
       <hr style={{ width: 500 }}/>
