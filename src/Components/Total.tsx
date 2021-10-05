@@ -29,7 +29,6 @@ const TotalDiv = styled(OriDiv)`
 interface Props {
   currencyCode : string;
   oriPr : number;
-  totalPr: number;
   disTotal: number;
 }
 
@@ -52,7 +51,7 @@ interface Props {
       </DisDiv>
       <TotalDiv>
         <TotalP>합계</TotalP>
-        <TotalPrice>{priceToString(props.totalPr)}원</TotalPrice>
+        <TotalPrice>{priceToString(props.oriPr-props.disTotal)}원</TotalPrice>
       </TotalDiv>
     </TotalSection>
   )

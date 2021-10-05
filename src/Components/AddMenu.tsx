@@ -12,7 +12,7 @@ const EditButton = styled(Button)`
   margin: 0;
 `;
 const MenuList = styled.div`
-  height: 500px;
+  height: 400px;
   width: 400px;
   overflow-y: auto;
 `;
@@ -93,9 +93,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [surgeryModal, setSurgeryModal] = useState(false);
   const [discountModal, setDiscountModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
-  const [totalPr, setTotalPr] = useState(0);
   const [oriPr, setOriPr] = useState(0);
-  const [disTotal, setDistotal] = useState(0);
   const [arr, setArr] = useState<myProps['arr']>([]);
   const [disArr, setDisArr] = useState<myProps['arr']>([]);
   let data: {name:string, price:number, count: number} = {
@@ -110,9 +108,10 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   }
   let dumy: any[] = [...arr];
   let money: number = 0;
-  let rebate: number = 0;
   let sale: number = 0;
+  let accSale : number = 0;
   let dumyDis: any[] = [...disArr];
+  //let find = document.getElementsByClassName('saleSum');
  
   const showSurgeryModal = () => {
     setSurgeryModal(true);
@@ -137,7 +136,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     setEditModal(false);
   };
   const handleOkEdit = () => {
-    
+    setDisArr(dumyDis);
     setEditModal(false);
   }
 
@@ -161,50 +160,9 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     // 그리고 더미를 arr에 뒤집어씌우기
     setArr(newArr);
     setOriPr(money);
-    setTotalPr(money);
+    //setTotalPr(money);
   }
   
-  // 메뉴리스트의 할인 셀렉트 변경 이벤트 함수
-  const handleDiscount = (e:any) => {
-    // 과거의 금액으로 돌아옴
-    console.log('disTotal::',disTotal)
-    setTotalPr(totalPr+(-disTotal));
-    let oriArr = [...disArr];
-    let helpArr = [...arr];
-    let dumy: {name: string, item: string, rate: number, price: number, count:number} = {
-      name: e.target.name,
-      item: e.target.value,
-      rate: Number(e.target.id),
-      price: 0,
-      count: 1,
-    }
-    
-    // 더미 데이터 만드는 로직
-    for(let i=0; i<helpArr.length; i++){
-      if(dumy['item'] === helpArr[i]['name']) {
-        dumy['price'] = helpArr[i]['price'];
-        dumy['count'] = helpArr[i]['count'];
-      }
-    }
-
-    // 완성된 더미데이터 oriArr에 대체하기
-    for(let i=0; i<oriArr.length; i++){
-      if(oriArr[i]['name'] === dumy['name']){ // 같으면
-        oriArr.splice(i,1,dumy);
-      }
-      rebate = rebate - (oriArr[i]['price']*oriArr[i]['count'])*oriArr[i]['rate']
-      //console.log('oriArr::',oriArr)
-    }
-    console.log('rebate::',rebate)
-    console.log('total::',totalPr);
-
-    setDisArr(oriArr);
-    setDistotal(rebate);
-    setTotalPr(totalPr+rebate);
-    
-    
-  } 
-
   // 시술리스트 인풋 클릭시 발생 이벤트 함수
   const handlePickItem = (e:any) => {
     data = {
@@ -242,11 +200,33 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     };
   }
 
+  // 할인 수정버튼 클릭시 발생 이벤트 함수
   const handleEdit = (e:any) => {
-    console.log('e.target.id',e.target.id); // price
-    console.log('e.target.name',e.target.name); // item
-    console.log('e.target.value',e.target.value); // count
+    let dumyDisArr = [...disArr];
+    let helpArr = [...arr];
     
+    for(let i=0; i < helpArr.length; i++){
+      if(e.target.name === helpArr[i]['name']) {
+        helpArr[i]['state'] = e.target.checked;
+      }
+    }  
+    setArr(helpArr);
+
+    /* 
+
+    // 완성된 더미데이터 oriArr에 대체하기
+    for(let i=0; i<oriArr.length; i++){
+      if(oriArr[i]['name'] === dumy['name']){ // 같으면
+        oriArr.splice(i,1,dumy);
+      }
+      rebate = rebate - (oriArr[i]['price']*oriArr[i]['count'])*oriArr[i]['rate']
+      //console.log('oriArr::',oriArr)
+    }
+    console.log('rebate::',rebate)
+    console.log('total::',totalPr);
+
+    setDisArr(oriArr);
+    setDistotal(rebate); */
   }
   
   // 시술모달 확인버튼 함수
@@ -256,7 +236,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       money = money + dumy[i]['price'];
     }
     setOriPr(money);
-    setTotalPr(money);
+    //setTotalPr(money);
     setSurgeryModal(false);
   };
   
@@ -336,47 +316,43 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
           <NoteP_2>선택된 시술이 없습니다.</NoteP_2>
         }
         {
-          arr.length > 0?
-          <>
-            <hr />
-          </>
-        : <></>
-        }
-        {
           disArr.length > 0 ?
-            disArr.map((e, idx, darr) => {
+            disArr.map((e, idx) => {
               return(
                 <MenuBox key={idx}>
                   <MenuName>
                     <ItemName>[{e.name}] {Math.floor(e.rate*100)}%</ItemName>
                     <NoteP_3>
-                      {arr.map((el,index,arr2) => {
-                        console.log('arr2:::',arr2)
+                      {
+                      arr.map((el) => {
                         return(
                           <>{el.name} </>
                         )
                       })}
                     </NoteP_3>
-                    <SalePrice>{
-                      arr.map(el => {sale = sale + (el.price * el.count)*e.rate;})}
-                      -{priceToString(sale)
+                    <SalePrice className="saleSum">{
+                      arr.map(el => {
+                        sale = sale + (el.price * el.count)*e.rate;
+                      })}
+                      -{priceToString(Math.floor(sale))
                       }원
                     </SalePrice>
+                  <p style={{'display':'none'}}>{accSale += sale}</p>
                   </MenuName>
                   <EditButton type="primary" icon={<EditOutlined />} onClick={handleOpenEdit}>수정</EditButton>
                 </MenuBox>
                 )
               })
-            :
-            <></>
-          }
+              :
+              <></>
+            }
           <Modal title="할인 메뉴 수정" visible={editModal} onOk={handleOkEdit} onCancel={handleCancelEdit}>
             <ModalUl>
             {
-              arr.map((e,idx,ar) => {
+              arr.map((e,idx) => {
                 return (
                   <ModalLi key={idx}>
-                    <ModalInput type="checkbox" value={e.count} id={e.price} name={e.name} onClick={handleEdit}/>
+                    <ModalInput type="checkbox" value={e.count} id={e.price} name={e.name} onClick={handleEdit} />
                     <label htmlFor={e.name}>{e.name}{e.count > 1 ? ` x `+ e.count : null}</label>
                     <p>{priceToString(e.price*e.count)}원</p>
                   </ModalLi>
@@ -387,7 +363,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
         </Modal>
       </MenuList>
       <hr style={{ width: 500 }}/>
-      <Total currencyCode={currencyCode} totalPr={totalPr} disTotal={disTotal} oriPr={oriPr}/>
+      <Total currencyCode={currencyCode} disTotal={accSale} oriPr={oriPr}/>
     </>
   );
 }
