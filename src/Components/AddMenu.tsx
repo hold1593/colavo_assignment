@@ -318,6 +318,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
         {
           disArr.length > 0 ?
             disArr.map((e, idx) => {
+              sale = 0;
               return(
                 <MenuBox key={idx}>
                   <MenuName>
@@ -331,8 +332,8 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
                       })}
                     </NoteP_3>
                     <SalePrice className="saleSum">{
-                      arr.map(el => {
-                        sale = sale + (el.price * el.count)*e.rate;
+                      arr.map((el) => {
+                        sale = sale +(el.price * el.count)*e.rate;
                       })}
                       -{priceToString(Math.floor(sale))
                       }원
