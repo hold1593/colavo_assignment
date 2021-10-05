@@ -2,18 +2,35 @@ import styled from "styled-components";
 
 const TotalSection = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   width: 400px;
-  align-items: center;
   margin-bottom: 5rem;
 `;
-const TotalPrice = styled.p`
+
+const Price = styled.p`
+  font-size: 15px;
+`;
+const TotalPrice = styled(Price)`
   font-size: 20px;
+`;
+const TotalP = styled.p`
+  font-size: 20px;
+`;
+
+const OriDiv=styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+`;
+const DisDiv = styled(OriDiv)``;
+const TotalDiv = styled(OriDiv)`
 `;
 
 interface Props {
   currencyCode : string;
+  oriPr : number;
   totalPr: number;
+  disTotal: number;
 }
 
  // 천단위 , 정규식
@@ -25,8 +42,18 @@ interface Props {
 
   return(
     <TotalSection>
-      <p>합계</p>
-      <TotalPrice>{priceToString(props.totalPr)}원</TotalPrice>
+      <OriDiv>
+        <p>시술</p>
+        <Price>{priceToString(props.oriPr)}원</Price>
+      </OriDiv>
+      <DisDiv>
+        <p>할인</p>
+        <Price>{priceToString(props.disTotal)}원</Price>
+      </DisDiv>
+      <TotalDiv>
+        <TotalP>합계</TotalP>
+        <TotalPrice>{priceToString(props.totalPr)}원</TotalPrice>
+      </TotalDiv>
     </TotalSection>
   )
 }

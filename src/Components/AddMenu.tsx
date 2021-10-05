@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined ,EditOutlined } from '@ant-design/icons';
 import Total from '../Components/Total';
 import styled from 'styled-components';
 import '../my_custom.css';
@@ -8,9 +8,13 @@ import '../my_custom.css';
 const ButtonSection = styled.section`
   display: flex;
 `;
+const EditButton = styled(Button)`
+  margin: 0;
+`;
 const MenuList = styled.div`
   height: 500px;
   width: 400px;
+  overflow-y: auto;
 `;
 const MenuBox = styled.div`
   display: flex;
@@ -41,7 +45,9 @@ const ModalUl = styled.ul`
   list-style: none;
   display: flex;
   flex-direction: column;
-  `;
+  max-height: 500px;
+  overflow-y: auto;
+`;
 const ModalLi = styled.li`
   margin-bottom: 15px;
   `;
@@ -67,6 +73,12 @@ const NoteP = styled.p`
   text-align: center;
   color: #9e9e9e;
 `;
+const NoteP_2 = styled(NoteP)`
+  font-size: 15px;
+`;
+const NoteP_3 = styled(NoteP)`
+  text-align: left;
+`;
 
 interface Props {
   item : [];
@@ -80,8 +92,10 @@ interface myProps {
 const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [surgeryModal, setSurgeryModal] = useState(false);
   const [discountModal, setDiscountModal] = useState(false);
-  const [pickDisModal, setPickDisModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
   const [totalPr, setTotalPr] = useState(0);
+  const [oriPr, setOriPr] = useState(0);
+  const [disTotal, setDistotal] = useState(0);
   const [arr, setArr] = useState<myProps['arr']>([]);
   const [disArr, setDisArr] = useState<myProps['arr']>([]);
   let data: {name:string, price:number, count: number} = {
@@ -96,6 +110,8 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   }
   let dumy: any[] = [...arr];
   let money: number = 0;
+  let rebate: number = 0;
+  let sale: number = 0;
   let dumyDis: any[] = [...disArr];
  
   const showSurgeryModal = () => {
@@ -114,6 +130,18 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     setDiscountModal(false);
   };
 
+  const handleOpenEdit = () => {
+    setEditModal(true);
+  };
+  const handleCancelEdit = () => {
+    setEditModal(false);
+  };
+  const handleOkEdit = () => {
+    
+    setEditModal(false);
+  }
+
+  // 메뉴리스트의 시술 셀렉트 변경 이벤트 함수
   const handleChange = (e:any) => {
     let newArr = [...arr];
     let dumy: {name:string, price:number, count: number} = {
@@ -122,8 +150,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       count : parseInt(e.target.value),
     }
 
-    console.log('dumy:::',dumy);
-    console.log('newArr:::',newArr);
     for(let i=0; i<newArr.length; i++){
       // arr[i]['name']값이 e.target.id랑 일치하면
       if(newArr[i]['name'] === e.target.id){
@@ -134,10 +160,15 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     }
     // 그리고 더미를 arr에 뒤집어씌우기
     setArr(newArr);
+    setOriPr(money);
     setTotalPr(money);
   }
-
+  
+  // 메뉴리스트의 할인 셀렉트 변경 이벤트 함수
   const handleDiscount = (e:any) => {
+    // 과거의 금액으로 돌아옴
+    console.log('disTotal::',disTotal)
+    setTotalPr(totalPr+(-disTotal));
     let oriArr = [...disArr];
     let helpArr = [...arr];
     let dumy: {name: string, item: string, rate: number, price: number, count:number} = {
@@ -147,9 +178,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       price: 0,
       count: 1,
     }
-   // console.log('helpArr::',helpArr)
-    //console.log('oriArr::',oriArr)
-    //console.log('dumy::',dumy)
     
     // 더미 데이터 만드는 로직
     for(let i=0; i<helpArr.length; i++){
@@ -158,18 +186,26 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
         dumy['count'] = helpArr[i]['count'];
       }
     }
-   // console.log('수정 dumy:::',dumy);
 
     // 완성된 더미데이터 oriArr에 대체하기
     for(let i=0; i<oriArr.length; i++){
       if(oriArr[i]['name'] === dumy['name']){ // 같으면
         oriArr.splice(i,1,dumy);
       }
+      rebate = rebate - (oriArr[i]['price']*oriArr[i]['count'])*oriArr[i]['rate']
+      //console.log('oriArr::',oriArr)
     }
-    //console.log('수정 oriArr::',oriArr)
+    console.log('rebate::',rebate)
+    console.log('total::',totalPr);
+
     setDisArr(oriArr);
+    setDistotal(rebate);
+    setTotalPr(totalPr+rebate);
+    
+    
   } 
 
+  // 시술리스트 인풋 클릭시 발생 이벤트 함수
   const handlePickItem = (e:any) => {
     data = {
       name: e.target.id,
@@ -188,6 +224,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     };
   }
 
+  // 할인리스트 인풋 클릭시 발생 이벤트 함수
   const handlePickDiscount = (e:any) => {
     disData = {
       name: e.target.id,
@@ -204,16 +241,26 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       }
     };
   }
+
+  const handleEdit = (e:any) => {
+    console.log('e.target.id',e.target.id); // price
+    console.log('e.target.name',e.target.name); // item
+    console.log('e.target.value',e.target.value); // count
+    
+  }
   
+  // 시술모달 확인버튼 함수
   const handleOkSurgery = () => {
     setArr(dumy);
     for(let i=0; i<dumy.length; i++) {
       money = money + dumy[i]['price'];
     }
+    setOriPr(money);
     setTotalPr(money);
     setSurgeryModal(false);
   };
-
+  
+  // 할인모달 확인버튼 함수
   const handleOkDiscount = () => {
     setDisArr(dumyDis);
     setDiscountModal(false);
@@ -251,7 +298,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
         <Modal title="할인" visible={discountModal} onOk={handleOkDiscount} onCancel={handleCancelDiscount}>
           <ModalUl>
           {
-            Object.entries(discount).map((e,idx) => {
+            Object.entries(discount).map((e,idx,aaa) => {
               return(
                 <ModalLi key={idx}>
                   <ModalInput type='checkbox' id={e[1]['name']} name={e[1]['rate']} onClick={handlePickDiscount}/>
@@ -275,7 +322,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
                   <ItemName>{e.name}</ItemName>
                   <Price>{priceToString(e.price*e.count)}원</Price>
                 </MenuName>
-                <SelectCount onChange={handleChange} id={e.name} name={e.price} >
+                <SelectCount onChange={handleChange} id={e.name} name={e.price}>
                   <option defaultValue="1">1</option> 
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -286,46 +333,61 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
             )
           })
           :
-          <></>
+          <NoteP_2>선택된 시술이 없습니다.</NoteP_2>
         }
         {
           arr.length > 0?
           <>
             <hr />
-            <NoteP>* 시술 갯수 조정 후 할인권 재선택 바랍니다.</NoteP>
           </>
         : <></>
         }
         {
           disArr.length > 0 ?
-            disArr.map((e, idx) => {
+            disArr.map((e, idx, darr) => {
               return(
                 <MenuBox key={idx}>
                   <MenuName>
                     <ItemName>[{e.name}] {Math.floor(e.rate*100)}%</ItemName>
+                    <NoteP_3>
+                      {arr.map((el,index,arr2) => {
+                        console.log('arr2:::',arr2)
+                        return(
+                          <>{el.name} </>
+                        )
+                      })}
+                    </NoteP_3>
                     <SalePrice>{
-                      isNaN((Math.floor(e.price*e.rate)*e.count)) ?
-                      0 : `-`+priceToString(Math.floor(e.price*e.rate)*e.count)
-                      }원</SalePrice>
+                      arr.map(el => {sale = sale + (el.price * el.count)*e.rate;})}
+                      -{priceToString(sale)
+                      }원
+                    </SalePrice>
                   </MenuName>
-                  <SelectCount onChange={handleDiscount} id={e.rate} name={e.name} className="init">
-                    <option defaultValue="none">선택</option>
-                    {
-                    arr.map((el,index) => {
-                      return (
-                        <option key={index} id={el.price} value={el.name}>{el.name}</option>
-                      )
-                    })}
-                  </SelectCount>
+                  <EditButton type="primary" icon={<EditOutlined />} onClick={handleOpenEdit}>수정</EditButton>
                 </MenuBox>
                 )
               })
             :
             <></>
-        }
+          }
+          <Modal title="할인 메뉴 수정" visible={editModal} onOk={handleOkEdit} onCancel={handleCancelEdit}>
+            <ModalUl>
+            {
+              arr.map((e,idx,ar) => {
+                return (
+                  <ModalLi key={idx}>
+                    <ModalInput type="checkbox" value={e.count} id={e.price} name={e.name} onClick={handleEdit}/>
+                    <label htmlFor={e.name}>{e.name}{e.count > 1 ? ` x `+ e.count : null}</label>
+                    <p>{priceToString(e.price*e.count)}원</p>
+                  </ModalLi>
+                )
+              })
+            }
+          </ModalUl>
+        </Modal>
       </MenuList>
       <hr style={{ width: 500 }}/>
-      <Total currencyCode={currencyCode} totalPr={totalPr} />
+      <Total currencyCode={currencyCode} totalPr={totalPr} disTotal={disTotal} oriPr={oriPr}/>
     </>
   );
 }
