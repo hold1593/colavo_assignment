@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button } from 'antd';
-import { PlusOutlined ,EditOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import Total from '../Components/Total';
 import styled from 'styled-components';
 import '../my_custom.css';
@@ -89,6 +89,7 @@ interface myProps {
   arr : any[];
   prevCount: number;
 }
+
 const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [surgeryModal, setSurgeryModal] = useState(false);
   const [discountModal, setDiscountModal] = useState(false);
@@ -111,35 +112,31 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   let sale: number = 0;
   let accSale : number = 0;
   let dumyDis: any[] = [...disArr];
-  //let find = document.getElementsByClassName('saleSum');
- 
+
+  // 시술 모달 열기 함수
   const showSurgeryModal = () => {
     setSurgeryModal(true);
   };
-
+  // 시술 모달 취소(닫기)함수
   const handleCancelSurgery = () => {
     setSurgeryModal(false);
   };
-
+  // 할인 모달 열기 함수
   const showDiscountModal = () => {
     setDiscountModal(true);
   };
-
+  // 할인 모달 취소(닫기)함수
   const handleCancelDiscount = () => {
     setDiscountModal(false);
   };
-
+  // 수정버튼 모달 오픈 함수
   const handleOpenEdit = () => {
     setEditModal(true);
   };
+  // 수정버튼 취소 함수
   const handleCancelEdit = () => {
     setEditModal(false);
   };
-  const handleOkEdit = () => {
-    setDisArr(dumyDis);
-    setEditModal(false);
-  }
-
   // 메뉴리스트의 시술 셀렉트 변경 이벤트 함수
   const handleChange = (e:any) => {
     let newArr = [...arr];
@@ -162,7 +159,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     setOriPr(money);
     //setTotalPr(money);
   }
-  
   // 시술리스트 인풋 클릭시 발생 이벤트 함수
   const handlePickItem = (e:any) => {
     data = {
@@ -181,7 +177,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       }
     };
   }
-
   // 할인리스트 인풋 클릭시 발생 이벤트 함수
   const handlePickDiscount = (e:any) => {
     disData = {
@@ -199,36 +194,15 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       }
     };
   }
-
   // 할인 수정버튼 클릭시 발생 이벤트 함수
   const handleEdit = (e:any) => {
-    let dumyDisArr = [...disArr];
-    let helpArr = [...arr];
     
-    for(let i=0; i < helpArr.length; i++){
-      if(e.target.name === helpArr[i]['name']) {
-        helpArr[i]['state'] = e.target.checked;
-      }
-    }  
-    setArr(helpArr);
-
-    /* 
-
-    // 완성된 더미데이터 oriArr에 대체하기
-    for(let i=0; i<oriArr.length; i++){
-      if(oriArr[i]['name'] === dumy['name']){ // 같으면
-        oriArr.splice(i,1,dumy);
-      }
-      rebate = rebate - (oriArr[i]['price']*oriArr[i]['count'])*oriArr[i]['rate']
-      //console.log('oriArr::',oriArr)
-    }
-    console.log('rebate::',rebate)
-    console.log('total::',totalPr);
-
-    setDisArr(oriArr);
-    setDistotal(rebate); */
   }
-  
+   // 수정 확인버튼 이벤트 함수
+   const handleOkEdit = () => {
+    alert('서비스 준비중 입니다.')
+    setEditModal(false);
+  }
   // 시술모달 확인버튼 함수
   const handleOkSurgery = () => {
     setArr(dumy);
@@ -239,13 +213,11 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     //setTotalPr(money);
     setSurgeryModal(false);
   };
-  
   // 할인모달 확인버튼 함수
   const handleOkDiscount = () => {
     setDisArr(dumyDis);
     setDiscountModal(false);
   };
-
   // 천단위 , 정규식
   const priceToString = (price:number) =>{
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -254,8 +226,8 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   return(
     <>
       <ButtonSection>
-        <Button type="primary" onClick={showSurgeryModal} icon={<PlusOutlined />} >
-          시술
+        <Button type="primary" onClick={showSurgeryModal}>
+          시술 선택 / 해제
         </Button>
         <Modal title="시술 메뉴" visible={surgeryModal} onOk={handleOkSurgery} onCancel={handleCancelSurgery}>
           <ModalUl>
@@ -272,13 +244,13 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
           }   
           </ModalUl>
         </Modal>
-        <Button type="default" onClick={showDiscountModal} icon={<PlusOutlined />} >
-          할인
+        <Button type="default" onClick={showDiscountModal}>
+          할인 선택 / 해제
         </Button>
         <Modal title="할인" visible={discountModal} onOk={handleOkDiscount} onCancel={handleCancelDiscount}>
           <ModalUl>
           {
-            Object.entries(discount).map((e,idx,aaa) => {
+            Object.entries(discount).map((e,idx) => {
               return(
                 <ModalLi key={idx}>
                   <ModalInput type='checkbox' id={e[1]['name']} name={e[1]['rate']} onClick={handlePickDiscount}/>
@@ -324,19 +296,11 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
                   <MenuName>
                     <ItemName>[{e.name}] {Math.floor(e.rate*100)}%</ItemName>
                     <NoteP_3>
-                      {
-                      arr.map((el) => {
-                        return(
-                          <>{el.name} </>
-                        )
-                      })}
+                      {arr.map((el) => {return(<>{el.name} </>)})}
                     </NoteP_3>
-                    <SalePrice className="saleSum">{
-                      arr.map((el) => {
-                        sale = sale +(el.price * el.count)*e.rate;
-                      })}
-                      -{priceToString(Math.floor(sale))
-                      }원
+                    <SalePrice>{
+                      arr.map((el) => {sale = sale +(el.price * el.count)*e.rate})}
+                      -{priceToString(Math.floor(sale))}원
                     </SalePrice>
                   <p style={{'display':'none'}}>{accSale += sale}</p>
                   </MenuName>

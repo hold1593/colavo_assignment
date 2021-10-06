@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import AddMenu from '../Components/AddMenu';
+import Nav from '../Components/Nav';
 import CustomerInfo from '../Components/CustomerInfo';
 import axios from 'axios';
 
@@ -37,6 +38,7 @@ const Cart = () => {
 
   return(
     <CartSection>
+      <Nav />
       <CustomerInfo /> 
       <AddMenu item={item} discount={discount} currencyCode={currencyCode}/>
     </CartSection>
