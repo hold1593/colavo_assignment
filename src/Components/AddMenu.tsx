@@ -97,10 +97,13 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   const [oriPr, setOriPr] = useState(0);
   const [arr, setArr] = useState<myProps['arr']>([]);
   const [disArr, setDisArr] = useState<myProps['arr']>([]);
-  let data: {name:string, price:number, count: number} = {
+  const [filterArr, setFilterArr] = useState<myProps['arr']>([]);
+  const [sta,setSta] = useState(true);
+  let data: {name:string, price:number, count: number, state: boolean} = {
     name: '',
     price: 0,
     count : 1,
+    state: true,
   }
   let disData: {name:string, rate:number, price:number} = {
     name: '',
@@ -130,7 +133,8 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
     setDiscountModal(false);
   };
   // 수정버튼 모달 오픈 함수
-  const handleOpenEdit = () => {
+  const handleOpenEdit = (e:any) => {
+    //console.log('e:::',e)
     setEditModal(true);
   };
   // 수정버튼 취소 함수
@@ -140,31 +144,32 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
   // 메뉴리스트의 시술 셀렉트 변경 이벤트 함수
   const handleChange = (e:any) => {
     let newArr = [...arr];
-    let dumy: {name:string, price:number, count: number} = {
+    data = {
       name : e.target.id,
       price : parseInt(e.target.name),
       count : parseInt(e.target.value),
+      state: true,
     }
 
     for(let i=0; i<newArr.length; i++){
       // arr[i]['name']값이 e.target.id랑 일치하면
       if(newArr[i]['name'] === e.target.id){
-        // 더미의 arr[i]를 삭제 후 그자리에 dumy 넣기
-        newArr.splice(i,1,dumy);
+        // 더미의 arr[i]를 삭제 후 그자리에 data 넣기
+        newArr.splice(i,1,data);
       }
       money = money + newArr[i]['price']*newArr[i]['count'];
     }
     // 그리고 더미를 arr에 뒤집어씌우기
     setArr(newArr);
     setOriPr(money);
-    //setTotalPr(money);
   }
   // 시술리스트 인풋 클릭시 발생 이벤트 함수
   const handlePickItem = (e:any) => {
     data = {
       name: e.target.id,
       price: parseInt(e.target.name),
-      count : parseInt(e.target.classList[2])
+      count : parseInt(e.target.classList[2]),
+      state : true,
     }
 
     if(e.target.checked){ // 체크누르면
@@ -194,13 +199,31 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       }
     };
   }
-  // 할인 수정버튼 클릭시 발생 이벤트 함수
+  // 할인수정의 인풋체크박스 클릭시 발생 이벤트 함수
   const handleEdit = (e:any) => {
-    
+  
+    data = {
+      name: e.target.name,
+      price : e.target.id,
+      count : e.target.value,
+      state : e.target.checked,
+    }
+
+    for(let i=0; i < dumy.length; i++){
+      if(dumy[i]['name'] === data['name']){
+        dumy[i]['state'] = data['state'];
+      }
+    }
+    for(let i=0; i < dumy.length; i++) {
+      if(dumy[i]['state'] === false){
+        dumy.splice(i,1);
+      }
+    }
   }
    // 수정 확인버튼 이벤트 함수
    const handleOkEdit = () => {
-    alert('서비스 준비중 입니다.')
+    //alert('서비스 준비중 입니다.')
+    setFilterArr(dumy);
     setEditModal(false);
   }
   // 시술모달 확인버튼 함수
@@ -210,7 +233,6 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
       money = money + dumy[i]['price'];
     }
     setOriPr(money);
-    //setTotalPr(money);
     setSurgeryModal(false);
   };
   // 할인모달 확인버튼 함수
@@ -296,7 +318,12 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
                   <MenuName>
                     <ItemName>[{e.name}] {Math.floor(e.rate*100)}%</ItemName>
                     <NoteP_3>
-                      {arr.map((el) => {return(<>{el.name} </>)})}
+                      {
+                        arr.map((el,idx,arr) => {
+                        return(
+                          <>{el.name} </>
+                        )
+                      })}
                     </NoteP_3>
                     <SalePrice>{
                       arr.map((el) => {sale = sale +(el.price * el.count)*e.rate})}
@@ -317,7 +344,7 @@ const AddMenu = ({item, discount, currencyCode}: Props) => {
               arr.map((e,idx) => {
                 return (
                   <ModalLi key={idx}>
-                    <ModalInput type="checkbox" value={e.count} id={e.price} name={e.name} onClick={handleEdit} />
+                    <ModalInput type="checkbox" value={e.count} id={e.price} name={e.name} onClick={handleEdit}/>
                     <label htmlFor={e.name}>{e.name}{e.count > 1 ? ` x `+ e.count : null}</label>
                     <p>{priceToString(e.price*e.count)}원</p>
                   </ModalLi>
